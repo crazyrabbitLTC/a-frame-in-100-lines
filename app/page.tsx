@@ -5,17 +5,9 @@ import { NEXT_PUBLIC_URL } from './config';
 const frameMetadata = getFrameMetadata({
   buttons: [
     {
-      label: 'Story time!',
+      label: 'Dad Joke',
     },
-    {
-      action: 'link',
-      label: 'Link to Google',
-      target: 'https://www.google.com',
-    },
-    {
-      label: 'Redirect to pictures',
-      action: 'post_redirect',
-    },
+
   ],
   image: `${NEXT_PUBLIC_URL}/park-1.png`,
   input: {

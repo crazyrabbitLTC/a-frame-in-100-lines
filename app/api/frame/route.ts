@@ -63,7 +63,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
   const body: FrameRequest = await req.json();
   const { isValid, message } = await getFrameMessage(body, { neynarApiKey: 'NEYNAR_ONCHAIN_KIT' });
 
-  if (isValid && message?.button === 1) {
+  if (message?.button === 1) {
     // Fetch a dad joke when the dad joke button is clicked
     try {
       const joke = await fetchDadJoke();
