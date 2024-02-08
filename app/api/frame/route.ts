@@ -75,7 +75,7 @@ function formatJokeForImage(joke: string, maxLength: number) {
       result += '+';
       lineLength += 1; // Account for the space
     }
-    result += encodeURIComponent(word);
+    result += word;
     lineLength += word.length;
   }
 
