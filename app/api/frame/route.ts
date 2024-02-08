@@ -80,7 +80,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     // Fetch a dad joke when the dad joke button is clicked
     try {
       let joke = await fetchDadJoke();
-      joke = insertNewLines(joke, 80);
+      joke = insertNewLines(joke, 50);
       console.log("🚀 ~ getResponse ~ joke:", joke)
       return new NextResponse(
         getFrameHtmlResponse({
