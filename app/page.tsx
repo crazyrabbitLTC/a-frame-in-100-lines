@@ -9,10 +9,7 @@ const frameMetadata = getFrameMetadata({
     },
 
   ],
-  image: `${NEXT_PUBLIC_URL}/park-1.png`,
-  input: {
-    text: 'Tell me a boat story',
-  },
+  image: `https://placehold.co/600x400/blue/white?text=hello`,
   post_url: `${NEXT_PUBLIC_URL}/api/frame`,
 });
 

@@ -67,6 +67,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     // Fetch a dad joke when the dad joke button is clicked
     try {
       const joke = await fetchDadJoke();
+      console.log("🚀 ~ getResponse ~ joke:", joke)
       return new NextResponse(
         getFrameHtmlResponse({
           buttons: [
