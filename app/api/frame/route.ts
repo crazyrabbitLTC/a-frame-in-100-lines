@@ -89,7 +89,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
               label: 'Dad Joke',
             },
           ],
-          image: `https://placehold.co/600x400?text=${joke}`,
+          image: `https://placehold.co/600x400?text=${encodeURIComponent(joke)}`,
           post_url: `${NEXT_PUBLIC_URL}/api/frame`,
         }),
       );
