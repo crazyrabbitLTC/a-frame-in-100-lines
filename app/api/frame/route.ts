@@ -90,22 +90,13 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
   const { isValid, message } = await getFrameMessage(body, { neynarApiKey: 'NEYNAR_ONCHAIN_KIT' });
 
   if (message?.button === 1) {
-    // Fetch a dad joke when the dad joke button is clicked
     try {
-      let joke = await fetchDadJoke();
-      joke = formatJokeForImage(joke, 50);
-      console.log("🚀 ~ getResponse ~ joke:", joke)
-      return new NextResponse(
-        getFrameHtmlResponse({
-          buttons: [
-            {
-              label: 'Dad Joke',
-            },
-          ],
-          image: `https://placehold.co/600x400?text=${joke}`,
-          post_url: `${NEXT_PUBLIC_URL}/api/frame`,
-        }),
-      );
+      const joke = await fetchDadJoke();
+      // Convert the joke to an SVG format
+      const svg = generateSvgImage(joke, 600, 400); // Width and height can be adjusted
+      return new NextResponse(svg, {
+        headers: { 'Content-Type': 'image/svg+xml' },
+      });
     } catch (error) {
       console.error('Error fetching dad joke:', error);
       // Handle error or return a default message
@@ -113,18 +104,26 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
   }
 
   // Default response if no button is clicked or if fetching dad joke fails
-  return new NextResponse(
-    getFrameHtmlResponse({
-      buttons: [
-        {
-          label: 'Dad Joke',
-        },
-      ],
-      image: `${NEXT_PUBLIC_URL}/default.png`,
-      post_url: `${NEXT_PUBLIC_URL}/api/frame`,
-    }),
-  );
+  const defaultSvg = generateSvgImage("Default Text", 600, 400);
+  return new NextResponse(defaultSvg, {
+    headers: { 'Content-Type': 'image/svg+xml' },
+  });
 }
+
+// Helper function to generate SVG image with text
+function generateSvgImage(text: string, width: number, height: number): string {
+  const formattedText = formatJokeForImage(text, 50); // Use this function if you want to format text
+  // SVG template with text. Adjust styles as needed.
+  return `
+    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="100%" fill="white"/>
+      <text x="10" y="20" font-family="Arial" font-size="16" fill="black">
+        ${formattedText.split('\n').map((line, index) => `<tspan x="10" dy="${index * 20}">${line}</tspan>`).join('')}
+      </text>
+    </svg>
+  `;
+}
+
 
 export async function POST(req: NextRequest): Promise<Response> {
   return getResponse(req);
