@@ -1,50 +1,6 @@
-// import { FrameRequest, getFrameMessage, getFrameHtmlResponse } from '@coinbase/onchainkit';
-// import { NextRequest, NextResponse } from 'next/server';
-// import { NEXT_PUBLIC_URL } from '../../config';
-
-// async function getResponse(req: NextRequest): Promise<NextResponse> {
-//   let accountAddress: string | undefined = '';
-//   let text: string | undefined = '';
-
-//   const body: FrameRequest = await req.json();
-//   const { isValid, message } = await getFrameMessage(body, { neynarApiKey: 'NEYNAR_ONCHAIN_KIT' });
-
-//   if (isValid) {
-//     accountAddress = message.interactor.verified_accounts[0];
-//   }
-
-//   if (message?.input) {
-//     text = message.input;
-//   }
-
-//   if (message?.button === 3) {
-//     return NextResponse.redirect(
-//       'https://www.google.com/search?q=cute+dog+pictures&tbm=isch&source=lnms',
-//       { status: 302 },
-//     );
-//   }
-
-//   return new NextResponse(
-//     getFrameHtmlResponse({
-//       buttons: [
-//         {
-//           label: `🌲 Text: ${text}`,
-//         },
-//       ],
-//       image: `${NEXT_PUBLIC_URL}/park-2.png`,
-//       post_url: `${NEXT_PUBLIC_URL}/api/frame`,
-//     }),
-//   );
-// }
-
-// export async function POST(req: NextRequest): Promise<Response> {
-//   return getResponse(req);
-// }
-
-// export const dynamic = 'force-dynamic';
-
 import { FrameRequest, getFrameMessage, getFrameHtmlResponse } from '@coinbase/onchainkit';
 import { NextRequest, NextResponse } from 'next/server';
+import { createCanvas, registerFont, loadImage } from 'canvas';
 import { NEXT_PUBLIC_URL } from '../../config';
 
 // Helper function to fetch a random dad joke
@@ -85,30 +41,47 @@ function formatJokeForImage(joke: string, maxLength: number) {
 }
 
 
-async function getResponse(req: NextRequest): Promise<NextResponse> {
-  const body: FrameRequest = await req.json();
-  const { isValid, message } = await getFrameMessage(body, { neynarApiKey: 'NEYNAR_ONCHAIN_KIT' });
+async function generatePngImage(text: string, width: number, height: number) {
+  const canvas = createCanvas(width, height);
+  const context = canvas.getContext('2d');
 
-  if (message?.button === 1) {
-    try {
-      const joke = await fetchDadJoke();
-      // Convert the joke to an SVG format
-      const svg = generateSvgImage(joke, 600, 400); // Width and height can be adjusted
-      return new NextResponse(svg, {
-        headers: { 'Content-Type': 'image/svg+xml' },
-      });
-    } catch (error) {
-      console.error('Error fetching dad joke:', error);
-      // Handle error or return a default message
-    }
-  }
+  // Fill background
+  context.fillStyle = '#FFFFFF'; // White background
+  context.fillRect(0, 0, width, height);
 
-  // Default response if no button is clicked or if fetching dad joke fails
-  const defaultSvg = generateSvgImage("Default Text", 600, 400);
-  return new NextResponse(defaultSvg, {
-    headers: { 'Content-Type': 'image/svg+xml' },
+  // Set text properties
+  context.fillStyle = '#000000'; // Black text
+  context.font = '16px Arial'; // Adjust as needed
+  context.textBaseline = 'top';
+
+  // Split text into lines
+  const lines = text.split('\n');
+  lines.forEach((line, index) => {
+    context.fillText(line, 10, 10 + index * 20); // Adjust positioning as needed
   });
+
+  // Convert canvas to PNG
+  return canvas.toBuffer();
 }
+
+async function getResponse(req: NextRequest): Promise<NextResponse> {
+  const body = await req.json();
+  // Assuming body contains the necessary information to fetch the dad joke
+  // and determine if a PNG should be generated
+
+  try {
+    const joke = await fetchDadJoke(); // Fetch the dad joke
+    const pngBuffer = await generatePngImage(joke, 600, 400); // Generate PNG image
+    return new NextResponse(pngBuffer, {
+      headers: { 'Content-Type': 'image/png' },
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    // Handle error or return a default message
+    return new NextResponse('Error generating image', { status: 500 });
+  }
+}
+
 
 // Helper function to generate SVG image with text
 function generateSvgImage(text: string, width: number, height: number): string {
