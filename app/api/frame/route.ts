@@ -58,20 +58,30 @@ async function fetchDadJoke() {
   const data = await response.json();
   return data.joke;
 }
-function insertNewLines(text: string, maxLength: number) {
+// Function to insert newline characters into a long text and URL encode for use in an image URL
+function formatJokeForImage(joke: string, maxLength: number) {
   let result = '';
-  while (text.length > 0) {
-    let part = text.substring(0, maxLength);
-    let nextSpace = part.lastIndexOf(' ');
-    if (text.length > maxLength && nextSpace > 0) {
-      part = part.substring(0, nextSpace);
+  let lineLength = 0;
+
+  // Split the joke into words
+  const words = joke.split(' ');
+  for (const word of words) {
+    // Check if adding the next word exceeds the max length
+    if (lineLength + word.length > maxLength) {
+      result += '%0A'; // Add encoded newline character
+      lineLength = 0; // Reset line length
+    } else if (lineLength > 0) {
+      // If not the first word on the line, add a space
+      result += '+';
+      lineLength += 1; // Account for the space
     }
-    result += part;
-    text = text.substring(part.length);
-    if (text.length > 0) result += '\n';
+    result += encodeURIComponent(word);
+    lineLength += word.length;
   }
+
   return result;
 }
+
 async function getResponse(req: NextRequest): Promise<NextResponse> {
   const body: FrameRequest = await req.json();
   const { isValid, message } = await getFrameMessage(body, { neynarApiKey: 'NEYNAR_ONCHAIN_KIT' });
@@ -80,7 +90,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     // Fetch a dad joke when the dad joke button is clicked
     try {
       let joke = await fetchDadJoke();
-      joke = insertNewLines(joke, 50);
+      joke = formatJokeForImage(joke, 50);
       console.log("🚀 ~ getResponse ~ joke:", joke)
       return new NextResponse(
         getFrameHtmlResponse({
