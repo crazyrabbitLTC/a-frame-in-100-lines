@@ -61,26 +61,29 @@ async function fetchDadJoke() {
 // Function to insert newline characters into a long text and URL encode for use in an image URL
 function formatJokeForImage(joke: string, maxLength: number) {
   let result = '';
-  let lineLength = 0;
+  let currentLine = '';
 
   // Split the joke into words
   const words = joke.split(' ');
-  for (const word of words) {
-    // Check if adding the next word exceeds the max length
-    if (lineLength + word.length > maxLength) {
-      result += '\n'; // Add encoded newline character
-      lineLength = 0; // Reset line length
-    } else if (lineLength > 0) {
-      // If not the first word on the line, add a space
-      result += '+';
-      lineLength += 1; // Account for the space
+  words.forEach((word: string, index: number) => {
+    // Add the word to the current line if it fits
+    if ((currentLine + word).length <= maxLength) {
+      currentLine += (currentLine.length > 0 ? '+' : '') + word; // Separate words with a '+'
+    } else {
+      // If the current line is full, append it to the result and start a new line
+      result += (result.length > 0 ? '\n' : '') + currentLine; // Separate lines with '%0A'
+      currentLine = word; // Start a new line with the current word
     }
-    result += word;
-    lineLength += word.length;
-  }
+
+    // If it's the last word, append the current line to the result
+    if (index === words.length - 1) {
+      result += (result.length > 0 ? '\n' : '') + currentLine;
+    }
+  });
 
   return result;
 }
+
 
 async function getResponse(req: NextRequest): Promise<NextResponse> {
   const body: FrameRequest = await req.json();
