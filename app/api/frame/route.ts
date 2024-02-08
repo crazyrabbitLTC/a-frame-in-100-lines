@@ -68,7 +68,7 @@ function formatJokeForImage(joke: string, maxLength: number) {
   for (const word of words) {
     // Check if adding the next word exceeds the max length
     if (lineLength + word.length > maxLength) {
-      result += '%0A'; // Add encoded newline character
+      result += '\n'; // Add encoded newline character
       lineLength = 0; // Reset line length
     } else if (lineLength > 0) {
       // If not the first word on the line, add a space
@@ -99,7 +99,7 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
               label: 'Dad Joke',
             },
           ],
-          image: `https://placehold.co/600x400?text=${encodeURIComponent(joke)}`,
+          image: `https://placehold.co/600x400?text=${joke}`,
           post_url: `${NEXT_PUBLIC_URL}/api/frame`,
         }),
       );
