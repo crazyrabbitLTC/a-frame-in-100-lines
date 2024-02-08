@@ -58,7 +58,20 @@ async function fetchDadJoke() {
   const data = await response.json();
   return data.joke;
 }
-
+function insertNewLines(text: string, maxLength: number) {
+  let result = '';
+  while (text.length > 0) {
+    let part = text.substring(0, maxLength);
+    let nextSpace = part.lastIndexOf(' ');
+    if (text.length > maxLength && nextSpace > 0) {
+      part = part.substring(0, nextSpace);
+    }
+    result += part;
+    text = text.substring(part.length);
+    if (text.length > 0) result += '\n';
+  }
+  return result;
+}
 async function getResponse(req: NextRequest): Promise<NextResponse> {
   const body: FrameRequest = await req.json();
   const { isValid, message } = await getFrameMessage(body, { neynarApiKey: 'NEYNAR_ONCHAIN_KIT' });
@@ -66,7 +79,8 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
   if (message?.button === 1) {
     // Fetch a dad joke when the dad joke button is clicked
     try {
-      const joke = await fetchDadJoke();
+      let joke = await fetchDadJoke();
+      joke = insertNewLines(joke, 80);
       console.log("🚀 ~ getResponse ~ joke:", joke)
       return new NextResponse(
         getFrameHtmlResponse({
